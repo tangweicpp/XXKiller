@@ -1,0 +1,76 @@
+name: cron update
+on:
+  schedule:
+    - cron: '50 21 * * *'
+  workflow_dispatch:
+  
+env: 
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: mae
+#          fetch-depth: 1
+
+#set time
+      - name: set time
+        shell: cmd
+        continue-on-error: true
+        timeout-minutes: 2
+        run: |
+          tzutil /s "China Standard Time"
+          
+#main
+      - name: run script
+        shell: cmd
+        continue-on-error: false
+        timeout-minutes: 10
+        run: |
+          cd .\RMaker
+          make.cmd
+          if not %errorlevel%==0 exit 110
+
+
+# purge jsdelivr cache(optional)
+      - name: purge cache
+        shell: cmd
+        continue-on-error: true
+        timeout-minutes: 1
+        run: |
+          .\RMaker\purge.cmd
+          
+          
+
+      - name: commit
+        run: |
+          git init
+          git rm -rf RMaker
+          git rm -rf .github
+          git rm -f LICENSE
+          git rm -f README.md
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git branch -D main
+          git checkout --orphan main
+          git add w.txt
+          git add changelog
+          git commit -m  "Last Update at $(date +"%Y-%m-%d %H:%M")"
+          git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git push -f -u origin main
+          
+          
+  #    - name: Push changes
+  #      uses: ad-m/github-push-action@master
+  #      with:
+  #        github_token: ${{ secrets.GITHUB_TOKEN }}
+  #        branch: main
+          
+
+  #    - name: Remove
+  #      shell: cmd
+  #      run: |
+  #        .\RMaker\remove.cmd
