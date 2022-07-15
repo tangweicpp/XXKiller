@@ -20,4 +20,5 @@ jobs:
       - name: Push
         run: |
           cd repo_gh
-           git push origin --force
+          git show-ref | cut -d' ' -f2 | grep 'pull' | xargs -r -L1 git update-ref -d
+          git push origin --force
