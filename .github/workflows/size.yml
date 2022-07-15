@@ -8,7 +8,7 @@ jobs:
       
     steps:
       - name: Clone repo
-        run: git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} repo_gh
+        run: git clone--mirror https://doingdog:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} repo_gh
           
       - name: Clean up
         run: |
